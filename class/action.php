@@ -259,5 +259,4 @@ if (isset($_GET['logoutUser'])) {
     header("location: login.php");
 }
 
-
 ?>
