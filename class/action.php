@@ -10,25 +10,27 @@ if ($dbConnect->connect_errno) {
     exit();
 }
 
-
 // Login Admin User and Set the Session for Authentication
 if (isset($_POST['loginButton'])) {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $sqlQuery = "SELECT * FROM users WHERE email='" . $email . "' AND password='" . $password . "' AND status = '1' AND type = 'admin'";
-    $resultSet = mysqli_query($dbConnect, $sqlQuery);
-    $isValidLogin = mysqli_num_rows($resultSet);
-    if ($isValidLogin) {
-        $userDetails = mysqli_fetch_assoc($resultSet);
-        $_SESSION["userid"] = $userDetails['id'];
-        $_SESSION["usertype"] = $userDetails['type'];
-        $_SESSION["name"] = $userDetails['name'];
-        $_SESSION["email"] = $userDetails['email'];
-        header("location: ../admin");
+    if (isset($_POST['name']) && isset($_POST['password'])) {
+        $name = $_POST['name'];
+        $password = $_POST['password'];
+        $sqlQuery = "SELECT * FROM users WHERE name='" . $name . "' AND password='" . $password . "' AND status = '1' AND type = 'admin'";
+        $resultSet = mysqli_query($dbConnect, $sqlQuery);
+        $isValidLogin = mysqli_num_rows($resultSet);
+        if ($isValidLogin) {
+            $userDetails = mysqli_fetch_assoc($resultSet);
+            $_SESSION["userid"] = $userDetails['id'];
+            $_SESSION["usertype"] = $userDetails['type'];
+            $_SESSION["name"] = $userDetails['name'];
+            $_SESSION["email"] = $userDetails['email'];
+            header("location: ../admin");
+        } else {
+            $error = "Login Failed";
+        }
     } else {
-        $error = "Login Failed";
+        $error = "Name and password are required.";
     }
-
 }
 
 // Create Quiz and also check if quiz Question already present in database
@@ -213,23 +215,27 @@ if (isset($_POST['registerUser'])) {
 
 // Login User and set the Authentication Session for Login
 if (isset($_POST['loginUserButton'])) {
-    $email = $_POST['username'];
-    $password = $_POST['password'];
-    $sqlQuery = "SELECT * FROM users WHERE email='" . $email . "' AND password='" . $password . "' AND status = '1' AND type = 'user'";
-    $resultSet = mysqli_query($dbConnect, $sqlQuery);
-    $isValidLogin = mysqli_num_rows($resultSet);
-    if ($isValidLogin) {
-        $userDetails = mysqli_fetch_assoc($resultSet);
-        $_SESSION["userid"] = $userDetails['id'];
-        $_SESSION["usertype"] = $userDetails['type'];
-        $_SESSION["name"] = $userDetails['name'];
-        $_SESSION["email"] = $userDetails['email'];
-        header("location: quiz.php");
+    if (isset($_POST['name']) && isset($_POST['password'])) {
+        $name = $_POST['name'];
+        $password = $_POST['password'];
+        $sqlQuery = "SELECT * FROM users WHERE name='" . $name . "' AND password='" . $password . "' AND status = '1' AND type = 'user'";
+        $resultSet = mysqli_query($dbConnect, $sqlQuery);
+        $isValidLogin = mysqli_num_rows($resultSet);
+        if ($isValidLogin) {
+            $userDetails = mysqli_fetch_assoc($resultSet);
+            $_SESSION["userid"] = $userDetails['id'];
+            $_SESSION["usertype"] = $userDetails['type'];
+            $_SESSION["name"] = $userDetails['name'];
+            $_SESSION["email"] = $userDetails['email'];
+            header("location: quiz.php");
+        } else {
+            $error = "Login Failed";
+        }
     } else {
-        $error = "Login Faild";
+        $error = "Name and password are required.";
     }
-
 }
+
 
 //Delete User Quiz from database
 if (isset($_GET['deleteResultId'])) {

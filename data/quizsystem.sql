@@ -20,12 +20,10 @@ SET time_zone = "+00:00";
 --
 -- Database: `quizsystem`
 --
-
 -- --------------------------------------------------------
 --
 -- Table structure for table `quizzes`
 --
-
 DROP TABLE IF EXISTS `quizzes`;
 CREATE TABLE IF NOT EXISTS `quizzes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -37,7 +35,6 @@ CREATE TABLE IF NOT EXISTS `quizzes` (
 --
 -- Dumping data for table `quizzes`
 --
-
 INSERT INTO `quizzes` (`id`, `question`, `options`, `correctAnswer`)
 VALUES (
     1,
@@ -169,7 +166,6 @@ VALUES (
 --
 -- Table structure for table `users`
 --
-
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -186,7 +182,6 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 -- Dumping data for table `users`
 --
-
 INSERT INTO `users` (
     `id`,
     `name`,
@@ -224,7 +219,6 @@ VALUES (
 --
 -- Table structure for table `user_quiz_result`
 --
-
 DROP TABLE IF EXISTS `user_quiz_result`;
 CREATE TABLE IF NOT EXISTS `user_quiz_result` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -238,7 +232,6 @@ CREATE TABLE IF NOT EXISTS `user_quiz_result` (
 --
 -- Dumping data for table `user_quiz_result`
 --
-
 INSERT INTO `user_quiz_result` (
     `id`,
     `user_id`,
