@@ -30,13 +30,18 @@ function updateProgress() {
     }`
 }
 
-// Shuffle and select 10 random questions with shuffled options
 function selectRandomQuestions(questions, count) {
-    shuffleArray(questions)
-    return questions.slice(0, count).map(question => {
-        let shuffledOptions = shuffleArray([...question.options])
-        return {...question, shuffledOptions}
-    })
+    // First, shuffle the entire array of questions
+    shuffleArray(questions);
+
+    // Then, slice the first 'count' questions from the shuffled array
+    let selected = questions.slice(0, count);
+
+    // Shuffle the options for each selected question
+    return selected.map(question => {
+        let shuffledOptions = shuffleArray([...question.options]);
+        return { ...question, shuffledOptions };
+    });
 }
 
 function shuffleArray(array) {
