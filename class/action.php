@@ -116,16 +116,16 @@ if (isset($_POST['updateQuizButton'])) {
     }
 }
 
-// Delete quiz from database
 if (isset($_GET['deleteQuestionId'])) {
-    $sqlQuery = "DELETE FROM quizzes WHERE id=" . $_GET['deleteQuestionId'] . "";
+    $sqlQuery = "DELETE FROM quizzes WHERE id=" . mysqli_real_escape_string($dbConnect, $_GET['deleteQuestionId']) . "";
     if (mysqli_query($dbConnect, $sqlQuery)) {
-        $error = "Record deleted successfully";
-        header("location: delete.php");
+        echo json_encode(["status" => "success", "message" => "Question deleted successfully"]);
     } else {
-        $error = "Error deleting record: " . mysqli_error($dbConnect);
+        echo json_encode(["status" => "error", "message" => "Error deleting record: " . mysqli_error($dbConnect)]);
     }
+    exit();
 }
+
 
 // Create new user
 if (isset($_POST['createNewUser'])) {
@@ -184,7 +184,7 @@ if (isset($_POST['updateNewUser'])) {
             $updateQuery .= ", password = '" . $password . "'";
         }
         $updateQuery .= ", type = '" . $userType . "' WHERE id='" . $userId . "'";
-        
+
         $isUpdated = mysqli_query($dbConnect, $updateQuery);
         if ($isUpdated) {
             $error = "Updated Successfully";
