@@ -13,25 +13,38 @@ if ($dbConnect->connect_errno) {
 // Login Admin User and Set the Session for Authentication
 if (isset($_POST['loginButton'])) {
     if (isset($_POST['name']) && isset($_POST['password'])) {
-        $name = $_POST['name'];
+        $name = mysqli_real_escape_string($dbConnect, $_POST['name']);
         $password = $_POST['password'];
-        $sqlQuery = "SELECT * FROM users WHERE name='" . $name . "' AND password='" . $password . "' AND status = '1' AND type = 'admin'";
+        $sqlQuery = "SELECT * FROM users WHERE name='" . $name . "' AND status = '1' AND type = 'admin'";
         $resultSet = mysqli_query($dbConnect, $sqlQuery);
-        $isValidLogin = mysqli_num_rows($resultSet);
-        if ($isValidLogin) {
-            $userDetails = mysqli_fetch_assoc($resultSet);
-            $_SESSION["userid"] = $userDetails['id'];
-            $_SESSION["usertype"] = $userDetails['type'];
-            $_SESSION["name"] = $userDetails['name'];
-            $_SESSION["email"] = $userDetails['email'];
-            header("location: ../admin");
+
+        if ($userDetails = mysqli_fetch_assoc($resultSet)) {
+            // Check if password matches the hashed password or the plaintext password
+            if (password_verify($password, $userDetails['password']) || $password === $userDetails['password']) {
+                // If the password is in plaintext, rehash it and update in the database
+                if ($password === $userDetails['password']) {
+                    $newHashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                    $updatePasswordQuery = "UPDATE users SET password = '" . $newHashedPassword . "' WHERE id = '" . $userDetails['id'] . "'";
+                    mysqli_query($dbConnect, $updatePasswordQuery);
+                }
+                // Set session variables and redirect
+                $_SESSION["userid"] = $userDetails['id'];
+                $_SESSION["usertype"] = $userDetails['type'];
+                $_SESSION["name"] = $userDetails['name'];
+                $_SESSION["email"] = $userDetails['email'];
+                header("location: ../admin");
+            } else {
+                $error = "Login Failed";
+            }
         } else {
-            $error = "Login Failed";
+            $error = "User not found";
         }
     } else {
         $error = "Name and password are required.";
     }
 }
+
+
 
 // Create Quiz and also check if quiz Question already present in database
 if (isset($_POST['createQuizButton'])) {
@@ -118,7 +131,7 @@ if (isset($_GET['deleteQuestionId'])) {
 if (isset($_POST['createNewUser'])) {
     $username = $_POST['username'];
     $email = $_POST['email'];
-    $password = $_POST['password'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $userType = $_POST['userType'];
 
     $sqlQuery = "SELECT * FROM users WHERE email='" . $email . "'";
@@ -153,29 +166,34 @@ if (isset($_GET['updateUserId'])) {
 
 // Update User and also check if User is present in database or not
 if (isset($_POST['updateNewUser'])) {
+    $userId = mysqli_real_escape_string($dbConnect, $_POST['updateUserId']);
+    $username = mysqli_real_escape_string($dbConnect, $_POST['username']);
+    $email = mysqli_real_escape_string($dbConnect, $_POST['email']);
+    $password = isset($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : null;
+    $userType = mysqli_real_escape_string($dbConnect, $_POST['userType']);
 
-    $userId = $_POST['updateUserId'];
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $userType = $_POST['userType'];
-
-    $sqlQuery = "SELECT * FROM users WHERE email='" . $email . "' and id != " . $userId . "";
+    $sqlQuery = "SELECT * FROM users WHERE email='" . $email . "' and id != '" . $userId . "'";
     $resultSet = mysqli_query($dbConnect, $sqlQuery);
     $result = mysqli_fetch_assoc($resultSet);
+
     if (!empty($result)) {
         $error = "User email Already Exist";
     } else {
-
-        $updateQuery = "UPDATE users SET name = '" . $username . "', email = '" . $email . "', password = '" . $password . "', type = '" . $userType . "' WHERE id=" . $userId . "";
+        $updateQuery = "UPDATE users SET name = '" . $username . "', email = '" . $email . "'";
+        if ($password) {
+            $updateQuery .= ", password = '" . $password . "'";
+        }
+        $updateQuery .= ", type = '" . $userType . "' WHERE id='" . $userId . "'";
+        
         $isUpdated = mysqli_query($dbConnect, $updateQuery);
         if ($isUpdated) {
             $error = "Updated Successfully";
         } else {
-            $error = "something went wrong";
+            $error = "Something went wrong";
         }
     }
 }
+
 
 // Delete user from database
 if (isset($_GET['deleteUserId'])) {
@@ -191,13 +209,12 @@ if (isset($_GET['deleteUserId'])) {
 
 // Register User and also login as well automatically
 if (isset($_POST['registerUser'])) {
-
     $name = $_POST['username'];
     $email = $_POST['email'];
-    $password = $_POST['password'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     $insertQuery = "INSERT INTO users (name, email, password, type, status) 
-                        VALUES ('" . $name . "', '" . $email . "', '" . $password . "', 'user', '1')";
+                    VALUES ('" . $name . "', '" . $email . "', '" . $password . "', 'user', '1')";
     $quizSaved = mysqli_query($dbConnect, $insertQuery);
     if ($quizSaved) {
         $sqlQuery = "SELECT * FROM users WHERE email='" . $email . "' AND password='" . $password . "' AND status = '1' AND type = 'user'";
@@ -216,25 +233,38 @@ if (isset($_POST['registerUser'])) {
 // Login User and set the Authentication Session for Login
 if (isset($_POST['loginUserButton'])) {
     if (isset($_POST['name']) && isset($_POST['password'])) {
-        $name = $_POST['name'];
+        $name = mysqli_real_escape_string($dbConnect, $_POST['name']);
         $password = $_POST['password'];
-        $sqlQuery = "SELECT * FROM users WHERE name='" . $name . "' AND password='" . $password . "' AND status = '1' AND type = 'user'";
+        $sqlQuery = "SELECT * FROM users WHERE name='" . $name . "' AND status = '1' AND type = 'user'";
         $resultSet = mysqli_query($dbConnect, $sqlQuery);
-        $isValidLogin = mysqli_num_rows($resultSet);
-        if ($isValidLogin) {
-            $userDetails = mysqli_fetch_assoc($resultSet);
-            $_SESSION["userid"] = $userDetails['id'];
-            $_SESSION["usertype"] = $userDetails['type'];
-            $_SESSION["name"] = $userDetails['name'];
-            $_SESSION["email"] = $userDetails['email'];
-            header("location: quiz.php");
+
+        if ($userDetails = mysqli_fetch_assoc($resultSet)) {
+            // Check if password matches the hashed password or the plaintext password
+            if (password_verify($password, $userDetails['password']) || $password === $userDetails['password']) {
+                // If the password is in plaintext, rehash it and update in the database
+                if ($password === $userDetails['password']) {
+                    $newHashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                    $updatePasswordQuery = "UPDATE users SET password = '" . $newHashedPassword . "' WHERE id = '" . $userDetails['id'] . "'";
+                    mysqli_query($dbConnect, $updatePasswordQuery);
+                }
+                // Set session variables and redirect to the quiz page
+                $_SESSION["userid"] = $userDetails['id'];
+                $_SESSION["usertype"] = $userDetails['type'];
+                $_SESSION["name"] = $userDetails['name'];
+                $_SESSION["email"] = $userDetails['email'];
+                header("location: quiz.php");
+            } else {
+                $error = "Login Failed";
+            }
         } else {
-            $error = "Login Failed";
+            $error = "User not found";
         }
     } else {
         $error = "Name and password are required.";
     }
 }
+
+
 
 
 //Delete User Quiz from database
@@ -258,5 +288,6 @@ if (isset($_GET['logoutUser'])) {
     session_destroy();
     header("location: login.php");
 }
+
 
 ?>
