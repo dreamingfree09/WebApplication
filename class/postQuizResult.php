@@ -8,9 +8,6 @@ if ($dbConnect->connect_errno) {
     exit();
 }
 
-// Store the result in database that user have taken the quiz
-// total correct answers, total wrong answers , incomplete answers
-// also attach the user id for scoreboard purpose to show the username
 $postData = json_decode(file_get_contents('php://input'), true);
 
 $correctCount = $postData['correctCount'];
@@ -18,36 +15,39 @@ $wrongCount = $postData['wrongCount'];
 $incompleteCount = $postData['incompleteCount'];
 $userId = $_SESSION['userid'];
 
-$sqlQuery = "SELECT * FROM user_quiz_result WHERE user_id=" . $userId . "";
-$resultSet = mysqli_query($dbConnect, $sqlQuery);
-$result = mysqli_fetch_assoc($resultSet);
-// if current user already taken the quiz update the scoreboard bases on current result
-// else insert the new record in user quiz result table
+// Check if the user already has a quiz result
+$checkStmt = $dbConnect->prepare("SELECT * FROM user_quiz_result WHERE user_id = ?");
+$checkStmt->bind_param("i", $userId);
+$checkStmt->execute();
+$result = $checkStmt->get_result()->fetch_assoc();
+
 if (!empty($result)) {
-    //
-    $sql = "UPDATE user_quiz_result SET correct_answer = " . $correctCount . ", wrong_answer = " . $wrongCount . ", incomplete_answer = " . $incompleteCount . ", result_date = '" . date('Y-m-d') . "' WHERE  user_id=" . $userId . "";
-    if ($dbConnect->query($sql) === TRUE) {
-        $response = array('status' => 'success', 'message' => 'Data saved successfully');
-    } else {
-        $response = array('status' => 'error', 'message' => 'Error saving data: ' . $dbConnect->error);
-    }
-    $dbConnect->close();
+    // Update existing quiz result
+    $updateStmt = $dbConnect->prepare("UPDATE user_quiz_result SET correct_answer = ?, wrong_answer = ?, incomplete_answer = ?, result_date = ? WHERE user_id = ?");
+    $date = date('Y-m-d');
+    $updateStmt->bind_param("iiisi", $correctCount, $wrongCount, $incompleteCount, $date, $userId);
 
-    header('Content-Type: application/json');
-    echo json_encode($response);
+    if ($updateStmt->execute()) {
+        $response = ['status' => 'success', 'message' => 'Data updated successfully'];
+    } else {
+        $response = ['status' => 'error', 'message' => 'Error updating data: ' . $updateStmt->error];
+    }
+    $updateStmt->close();
 } else {
-    $sql = "INSERT INTO user_quiz_result (user_id, correct_answer, wrong_answer, incomplete_answer, result_date) VALUES (" . $userId . ", " . $correctCount . ", " . $wrongCount . ", " . $incompleteCount . ", '" . date('Y-m-d') . "')";
-    if ($dbConnect->query($sql) === TRUE) {
-        $response = array('status' => 'success', 'message' => 'Data saved successfully');
+    // Insert new quiz result
+    $insertStmt = $dbConnect->prepare("INSERT INTO user_quiz_result (user_id, correct_answer, wrong_answer, incomplete_answer, result_date) VALUES (?, ?, ?, ?, ?)");
+    $date = date('Y-m-d');
+    $insertStmt->bind_param("iiisi", $userId, $correctCount, $wrongCount, $incompleteCount, $date);
+
+    if ($insertStmt->execute()) {
+        $response = ['status' => 'success', 'message' => 'Data saved successfully'];
     } else {
-        $response = array('status' => 'error', 'message' => 'Error saving data: ' . $dbConnect->error);
+        $response = ['status' => 'error', 'message' => 'Error saving data: ' . $insertStmt->error];
     }
-    $dbConnect->close();
-
-    header('Content-Type: application/json');
-    echo json_encode($response);
-
+    $insertStmt->close();
 }
 
-
+$dbConnect->close();
+header('Content-Type: application/json');
+echo json_encode($response);
 ?>

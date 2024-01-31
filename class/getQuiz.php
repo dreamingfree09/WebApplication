@@ -8,15 +8,14 @@ if ($dbConnect->connect_errno) {
     exit();
 }
 
+// Prepare statement to fetch quizzes
+$stmt = $dbConnect->prepare("SELECT * FROM quizzes");
+$stmt->execute();
+$resultSet = $stmt->get_result();
 
-// Fetch  Quizes from databases and set the json format to pass on frontend
-$sqlQuery = "SELECT * FROM quizzes";
-$result = $dbConnect->query($sqlQuery);
-if ($result) {
-    $data = $result->fetch_all(MYSQLI_ASSOC);
-
-    $result->free_result();
-
+if ($resultSet) {
+    $data = $resultSet->fetch_all(MYSQLI_ASSOC);
+    $resultSet->free_result();
     $dbConnect->close();
 
     header('Content-Type: application/json');
@@ -24,19 +23,17 @@ if ($result) {
     foreach ($data as $key => $row) {
         $options = [];
         if (isset($row['options'])) {
-            $options = explode(',', $row['options']); // convert from commas separated to array
+            $options = explode(',', $row['options']); // convert from comma-separated to array
         }
         $array = [
             "id" => $key + 1,
             "question" => $row['question'], //question
             "options" => $options, // all options
-            "correctAnswer" => $options[$row['correctAnswer']] // correct  answer
+            "correctAnswer" => $options[$row['correctAnswer']] // correct answer
         ];
 
-        array_push($records, $array); // push data in records array of object
+        array_push($records, $array); // push data into records array of object
     }
     echo json_encode($records);
 }
-
-
 ?>
