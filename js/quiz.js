@@ -1,6 +1,8 @@
 // All the questions and options
 var quizQuestions = null
 var selectedQuestions = null
+
+// Fetch quiz questions from the server
 fetch('../class/getQuiz.php')
     .then(response => {
         if (!response.ok) {
@@ -17,12 +19,12 @@ fetch('../class/getQuiz.php')
     })
 
 var currentQuestionIndex = 0
-
 var correctCount = 0
 var wrongCount = 0
 var incompleteCount = 0
 var timer
 
+// Function to update the progress display
 function updateProgress() {
     const progressElement = document.getElementById('quizProgress')
     progressElement.textContent = `Question ${currentQuestionIndex + 1} of ${
@@ -30,6 +32,7 @@ function updateProgress() {
     }`
 }
 
+// Function to select random questions from the array
 function selectRandomQuestions(questions, count) {
     // First, shuffle the entire array of questions
     shuffleArray(questions);
@@ -44,6 +47,7 @@ function selectRandomQuestions(questions, count) {
     });
 }
 
+// Function to shuffle an array
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
@@ -52,6 +56,7 @@ function shuffleArray(array) {
     return array
 }
 
+// Function to display the current question
 function displayCurrentQuestion() {
     clearInterval(timer)
     const question = selectedQuestions[currentQuestionIndex]
@@ -104,12 +109,13 @@ window.answerSelected = function (optionValue, questionId) {
     enableNextButton(true)
 }
 
+// Function to enable or disable the Next button
 function enableNextButton(enabled) {
     const nextButton = document.getElementById('nextQuestion')
     nextButton.disabled = !enabled
 }
 
-// The timer and its implementation
+// Timer and its implementation
 function startTimer() {
     let timeLeft = 15
     const timerElement = document.getElementById('timer')
@@ -128,6 +134,7 @@ function startTimer() {
     }, 1000)
 }
 
+// Function to navigate to the next question
 function goToNextQuestion() {
     if (currentQuestionIndex < selectedQuestions.length - 1) {
         currentQuestionIndex++
@@ -138,7 +145,7 @@ function goToNextQuestion() {
     }
 }
 
-// To display results
+// Function to display quiz results
 function displayResults() {
     const quizResults = document.getElementById('quiz-results')
     quizResults.innerHTML = `<h3>Quiz Completed!</h3>
@@ -154,6 +161,7 @@ function displayResults() {
         incompleteCount: incompleteCount
     };
 
+    // Send quiz results to the server
     fetch('../class/postQuizResult.php', {
         method: 'POST',
         headers: {
@@ -170,7 +178,7 @@ function displayResults() {
         });
 }
 
-// Starting the quiz
+// Function to initialize the quiz
 function initializeQuiz() {
     currentQuestionIndex = 0
     correctCount = 0
@@ -184,8 +192,10 @@ function initializeQuiz() {
     document.getElementById('startQuiz').textContent = 'Restart Quiz'
 }
 
+// Event listener for starting the quiz
 document.getElementById('startQuiz').addEventListener('click', initializeQuiz)
 
+// Event listener for the Next button
 document.getElementById('quizForm').addEventListener('click', event => {
     if (event.target && event.target.id === 'nextQuestion') {
         goToNextQuestion()
