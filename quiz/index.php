@@ -1,54 +1,37 @@
-<?php
-// This PHP tag includes the 'action.php' file from the '../class' directory. 
-// The 'action.php' file definitions for various actions, functions and database operations related to the website.
-include('../class/action.php');
-?>
-
+<?php include('../class/action.php'); ?>
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8" />
-    <title>Home Page</title> <!-- The title of the webpage shown in the browser tab. -->
+    <title>Home Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- The viewport meta tag ensures the site is responsive and displays correctly on all devices. -->
     <meta name="description"
         content="The Football Quiz is a fun and interactive way to test your knowledge of football." />
-    <!-- Description meta tag for SEO, providing a brief description of the page's content. -->
     <link rel="stylesheet" href="../css/home-style.css" />
-    <!-- Link to an external CSS file that styles the homepage. -->
 </head>
 
 <body>
     <header>
-        <h1>Football Quiz!</h1> <!-- The main heading of the webpage. -->
+        <h1>Football Quiz!</h1>
         <nav>
-            <!-- Navigation bar section for site navigation links. -->
             <ul>
-                <!-- Unordered list used to contain navigation items. -->
-                <li><a href="index.php">Home</a></li> <!-- Navigation link to the home page. -->
-                <li><a href="quiz.php">Take the Quiz</a></li> <!-- Link to take the quiz. -->
+                <li><a href="index.php">Home</a></li>
+                <li><a href="quiz.php">Take the Quiz</a></li>
                 <li>
-                    <a href="scoreboard.php">View the Scoreboard</a> <!-- Link to view the scoreboard. -->
+                    <a href="scoreboard.php">View the Scoreboard</a>
                 </li>
-                <?php
-                // PHP conditional statement to display navigation options based on the user's login status.
-                if (isset($_SESSION['userid']) && $_SESSION['usertype'] == "user") {
-                    // If the user is logged in (checked by session 'userid') and is of type 'user',
-                    ?>
+                <?php if (isset($_SESSION['userid']) && $_SESSION['usertype'] == "user") { ?>
                     <li><a href="index.php?logoutUser=true">LogOut</a></li>
-                    <!-- Display the logout option. -->
                 <?php } else { ?>
-                    <li><a href="login.php">Log In</a></li> <!-- Display login link if user not logged in. -->
-                    <li><a href="register.php">Register</a></li> <!-- Display registration link for new users. -->
+                    <li><a href="login.php">Log In</a></li>
+                    <li><a href="register.php">Register</a></li>
                 <?php } ?>
             </ul>
         </nav>
     </header>
     <main>
-        <!-- Main content area of the webpage. -->
         <section>
-            <!-- Section for about the quiz information. -->
             <h2>About the Quiz</h2>
             <p>
                 The Football Quiz is a fun and interactive way to test your knowledge
@@ -58,12 +41,9 @@ include('../class/action.php');
             </p>
         </section>
         <figure id="imageCarousel" class="carousel">
-            <!-- Placeholder for a carousel or image gallery (requires implementation in JS/CSS). -->
             <figcaption>Football is my life</figcaption>
-            <!-- Caption for the carousel or image gallery. -->
         </figure>
         <section>
-            <!-- Section describing how to play the quiz. -->
             <h2>How to Play</h2>
             <p>
                 To play the quiz, simply click on the "Take the Quiz" link in the
@@ -74,7 +54,6 @@ include('../class/action.php');
             </p>
         </section>
         <section>
-            <!-- Section about the creators of the quiz. -->
             <h2>About Us</h2>
             <p>
                 The Football Quiz was created by a team of football enthusiasts who
@@ -85,11 +64,9 @@ include('../class/action.php');
         </section>
     </main>
     <footer>
-        <!-- Footer section of the webpage. -->
-        <p>© <span id="currentYear"></span> Football Quiz</p> <!-- Copyright notice with dynamic year update. -->
+        <p>© <span id="currentYear"></span> Football Quiz</p>
     </footer>
     <script src="../js/Home-script.js"></script>
-    <!-- Link to external JavaScript file for dynamic behavior, like updating the current year. -->
 </body>
 
 </html>
